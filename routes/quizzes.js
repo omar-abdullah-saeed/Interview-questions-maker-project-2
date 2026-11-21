@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { QuizAttempt } from "../models/QuizAttempt.js";
 import { generateJobSubjects, generateQuiz } from "../lib/gemini.js";
+import { authenticate } from "../utils/auth.js";
 import { validateQuizQuestion } from "../utils/validation.js";
 
 const router = Router();
@@ -102,7 +103,7 @@ router.post("/generate", async (req, res, next) => {
   }
 });
 
-router.post("/attempts", async (req, res, next) => {
+router.post("/attempts", authenticate, async (req, res, next) => {
   try {
     const { topic, questions, answers, score } = req.body ?? {};
     if (
@@ -134,7 +135,7 @@ router.post("/attempts", async (req, res, next) => {
   }
 });
 
-router.get("/attempts", async (req, res, next) => {
+router.get("/attempts", authenticate, async (req, res, next) => {
   try {
     const attempts = await QuizAttempt.find({ user: req.userId }).sort({ createdAt: -1 }).lean();
     return res.json(attempts);
